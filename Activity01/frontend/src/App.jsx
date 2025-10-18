@@ -98,7 +98,7 @@ function App() {
     },
 
     input: {
-      flex: "1",
+      flex: "2",
       padding: "12px 14px",
       borderRadius: "8px",
       border: "none",
@@ -122,7 +122,7 @@ function App() {
 
     taskList: {
       backgroundColor: "#C0DBEA",
-      flex: 2,
+      flex: 1,
       padding: "3rem",
       display: "flex",
       flexDirection: "column",
