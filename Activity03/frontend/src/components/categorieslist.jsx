@@ -1,3 +1,4 @@
+// categorieslist.jsx
 import React, { useEffect, useState } from "react";
 
 export default function CategoriesList() {
@@ -42,37 +43,81 @@ export default function CategoriesList() {
     }
   };
 
-  const handleEdit = (cat) => {
-    setEditing(cat);
-    setName(cat.name);
+  const handleEdit = async (cat) => {
+    const newName = prompt("Enter category name:", cat.name);
+    if (newName === null) return;
+
+    const payload = { name: newName };
+    await fetch(`http://localhost:3001/categories/${cat.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    loadCategories();
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h2>Categories</h2>
-      <form onSubmit={handleSubmit}>
-        <input placeholder="Category name" value={name} onChange={(e) => setName(e.target.value)} required />{" "}
-        <button type="submit">{editing ? "Update" : "Add"}</button>{" "}
-        {editing && <button onClick={() => setEditing(null)}>Cancel</button>}
+    <div className="section-card">
+      <h2 className="section-title">Categories</h2>
+      <form onSubmit={handleSubmit} className="form">
+        <div className="form-group">
+          <input 
+            className="form-input"
+            placeholder="Category name" 
+            value={name} 
+            onChange={(e) => setName(e.target.value)} 
+            required 
+          />
+        </div>
+        <div className="button-group">
+          <button type="submit" className="btn btn-primary">
+            {editing ? "Update" : "Add Category"}
+          </button>
+          {editing && (
+            <button 
+              type="button" 
+              className="btn btn-secondary"
+              onClick={() => setEditing(null)}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
-      <hr />
-      <table border="1" cellPadding="8" width="100%">
-        <thead>
-          <tr><th>ID</th><th>Name</th><th>Actions</th></tr>
-        </thead>
-        <tbody>
-          {categories.map((c) => (
-            <tr key={c.id}>
-              <td>{c.id}</td>
-              <td>{c.name}</td>
-              <td>
-                <button onClick={() => handleEdit(c)}>Edit</button>{" "}
-                <button onClick={() => handleDelete(c.id)}>Delete</button>
-              </td>
+      
+      <div className="table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {categories.map((c) => (
+              <tr key={c.id}>
+                <td className="id-cell">{c.id}</td>
+                <td className="name-cell">{c.name}</td>
+                <td className="actions-cell">
+                  <button 
+                    onClick={() => handleEdit(c)}
+                    className="btn btn-edit"
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(c.id)}
+                    className="btn btn-delete"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

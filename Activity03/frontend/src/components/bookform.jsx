@@ -1,3 +1,4 @@
+// bookform.jsx
 import React, { useEffect, useState } from "react";
 import { createBook, updateBook } from "../api/books";
 
@@ -41,69 +42,87 @@ export default function BookForm({ onSave, editingBook, clearEdit }) {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
-    ...form,
-    publishedYear: Number(form.publishedYear),
-    authorId: Number(form.authorId),
-    categoryId: Number(form.categoryId),
+      ...form,
+      publishedYear: Number(form.publishedYear),
+      authorId: Number(form.authorId),
+      categoryId: Number(form.categoryId),
     };
 
     if (editingBook) {
-        await updateBook(editingBook.id, payload);
-        clearEdit();
+      await updateBook(editingBook.id, payload);
+      clearEdit();
     } else {
-        await createBook(payload);
+      await createBook(payload);
     }
 
     setForm({ title: "", description: "", publishedYear: "", authorId: "", categoryId: "" });
     onSave();
-};
-
+  };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: "1rem" }}>
-      <h3>{editingBook ? "Edit Book" : "Add Book"}</h3>
+    <div className="section-card">
+      <form onSubmit={handleSubmit} className="form">
+        <h3 className="form-title">{editingBook ? "Edit Book" : "Add New Book"}</h3>
+        
+        <div className="form-group">
+          <input
+            className="form-input"
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            placeholder="Book Title"
+            required
+          />
+          <input
+            className="form-input"
+            name="publishedYear"
+            value={form.publishedYear}
+            onChange={handleChange}
+            placeholder="Published Year"
+            required
+          />
+        </div>
 
-      <input
-        name="title"
-        value={form.title}
-        onChange={handleChange}
-        placeholder="Title"
-        required
-      />{" "}
-      <input
-        name="publishedYear"
-        value={form.publishedYear}
-        onChange={handleChange}
-        placeholder="Year"
-        required
-      />
-      <br /><br />
+        <div className="form-group">
+          <textarea
+            className="form-textarea"
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            placeholder="Book Description"
+            rows="3"
+          />
+        </div>
 
-      <textarea
-        name="description"
-        value={form.description}
-        onChange={handleChange}
-        placeholder="Description"
-      />
-      <br /><br />
+        <div className="form-group">
+          <select className="form-select" name="authorId" value={form.authorId} onChange={handleChange} required>
+            <option value="">Select Author</option>
+            {authors.map((a) => (
+              <option key={a.id} value={a.id}>{a.name}</option>
+            ))}
+          </select>
+          <select className="form-select" name="categoryId" value={form.categoryId} onChange={handleChange} required>
+            <option value="">Select Category</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        </div>
 
-      <select name="authorId" value={form.authorId} onChange={handleChange} required>
-        <option value="">Select Author</option>
-        {authors.map((a) => (
-          <option key={a.id} value={a.id}>{a.name}</option>
-        ))}
-      </select>{" "}
-      <select name="categoryId" value={form.categoryId} onChange={handleChange} required>
-        <option value="">Select Category</option>
-        {categories.map((c) => (
-          <option key={c.id} value={c.id}>{c.name}</option>
-        ))}
-      </select>{" "}
-
-      <button type="submit">{editingBook ? "Update" : "Add"}</button>
-    </form>
+        <div className="button-group">
+          <button type="submit" className="btn btn-primary">
+            {editingBook ? "Update Book" : "Add Book"}
+          </button>
+          {editingBook && (
+            <button type="button" className="btn btn-secondary" onClick={clearEdit}>
+              Cancel
+            </button>
+          )}
+        </div>
+      </form>
+    </div>
   );
 }

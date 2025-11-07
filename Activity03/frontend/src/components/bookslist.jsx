@@ -1,3 +1,4 @@
+// bookslist.jsx
 import React, { useEffect, useState } from "react";
 import { getBooks, deleteBook } from "../api/books";
 import BookForm from "./bookform";
@@ -22,44 +23,81 @@ export default function BooksList() {
     }
   };
 
+  const handleEdit = async (book) => {
+    const newTitle = prompt("Enter book title:", book.title);
+    if (newTitle === null) return;
+    
+    const newYear = prompt("Enter published year:", book.publishedYear);
+    if (newYear === null) return;
+    
+    const newDescription = prompt("Enter description:", book.description || "");
+    if (newDescription === null) return;
+
+    const payload = {
+      title: newTitle,
+      publishedYear: Number(newYear),
+      description: newDescription,
+      authorId: book.author?.id,
+      categoryId: book.category?.id
+    };
+
+    await fetch(`http://localhost:3001/books/${book.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    loadBooks();
+  };
+
   return (
-    <div style={{ padding: "2rem" }}>
-      <h2>Bookshelf</h2>
+    <div className="section-card">
+      <h2 className="section-title">Bookshelf</h2>
 
       <BookForm
         onSave={loadBooks}
         editingBook={editingBook}
         clearEdit={() => setEditingBook(null)}
       />
-      <hr />
-
-      <table border="1" cellPadding="8" width="100%">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Year</th>
-            <th>Author</th>
-            <th>Category</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {books.map((b) => (
-            <tr key={b.id}>
-              <td>{b.id}</td>
-              <td>{b.title}</td>
-              <td>{b.publishedYear}</td>
-              <td>{b.author?.name}</td>
-              <td>{b.category?.name}</td>
-              <td>
-                <button onClick={() => setEditingBook(b)}>Edit</button>{" "}
-                <button onClick={() => handleDelete(b.id)}>Delete</button>
-              </td>
+      
+      <div className="table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Year</th>
+              <th>Author</th>
+              <th>Category</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {books.map((b) => (
+              <tr key={b.id}>
+                <td className="id-cell">{b.id}</td>
+                <td className="title-cell">{b.title}</td>
+                <td className="year-cell">{b.publishedYear}</td>
+                <td className="author-cell">{b.author?.name}</td>
+                <td className="category-cell">{b.category?.name}</td>
+                <td className="actions-cell">
+                  <button 
+                    onClick={() => handleEdit(b)}
+                    className="btn btn-edit"
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(b.id)}
+                    className="btn btn-delete"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
