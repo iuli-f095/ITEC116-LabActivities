@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { NotesModule } from './notes/notes.module';
-import { User } from './auth/user.entity';
-import { Note } from './notes/note.entity';
+import { UsersModule } from './users/users.module';
+import { APP_PIPE } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -12,13 +12,20 @@ import { Note } from './notes/note.entity';
       host: 'localhost',
       port: 3306,
       username: 'root',
-      password: '', // only fill this if your MySQL has a password
+      password: '',
       database: 'notes_app',
-      entities: [User, Note],
-      synchronize: true, // auto create tables
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      synchronize: true,
     }),
     AuthModule,
     NotesModule,
+    UsersModule,
+  ],
+  providers: [
+    {
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
+    },
   ],
 })
 export class AppModule {}
