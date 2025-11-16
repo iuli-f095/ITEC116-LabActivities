@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors(); // allow frontend to call API
+  app.enableCors(); 
 
   const config = new DocumentBuilder()
     .setTitle('To-Do API')

@@ -3,7 +3,12 @@ import { registerUser } from "../api/auth";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function Register() {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ 
+    name: "", 
+    email: "", 
+    username: "", 
+    password: "" 
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -18,10 +23,17 @@ export default function Register() {
       alert("Registered successfully!");
       navigate("/login");
     } catch (error) {
-      setError("Registration failed. Please try again.");
+      setError(error.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    });
   };
 
   return (
@@ -38,9 +50,21 @@ export default function Register() {
           <div className="form-group">
             <label>Full Name</label>
             <input 
+              name="name"
               placeholder="Enter your full name"
               value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Username</label>
+            <input 
+              name="username"
+              placeholder="Choose a username"
+              value={form.username}
+              onChange={handleChange}
               required
             />
           </div>
@@ -49,9 +73,10 @@ export default function Register() {
             <label>Email Address</label>
             <input 
               type="email"
+              name="email"
               placeholder="Enter your email"
               value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              onChange={handleChange}
               required
             />
           </div>
@@ -60,9 +85,10 @@ export default function Register() {
             <label>Password</label>
             <input 
               type="password"
+              name="password"
               placeholder="Enter your password (min 6 characters)"
               value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              onChange={handleChange}
               required
               minLength="6"
             />

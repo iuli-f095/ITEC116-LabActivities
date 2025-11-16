@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Comment } from './comment.entity';
@@ -21,11 +21,45 @@ export class CommentsService {
   }
 
   async findByPost(postId: number) {
-    return this.commentsRepo.find({ where: { post: { id: postId } },
-    relations: ['author', 'post'],
-    order: { createdAt: 'DESC' },
-  });
-  
-}
+    return this.commentsRepo.find({ 
+      where: { post: { id: postId } },
+      relations: ['author', 'post'],
+      order: { createdAt: 'DESC' },
+    });
+  }
 
+  async update(id: number, content: string, userId: number) {
+    const comment = await this.commentsRepo.findOne({ 
+      where: { id }, 
+      relations: ['author'] 
+    });
+
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+
+    if (comment.author.id !== userId) {
+      throw new ForbiddenException('You can only update your own comments');
+    }
+
+    await this.commentsRepo.update(id, { content });
+    return this.commentsRepo.findOne({ where: { id }, relations: ['author'] });
+  }
+
+  async remove(id: number, userId: number) {
+    const comment = await this.commentsRepo.findOne({ 
+      where: { id }, 
+      relations: ['author'] 
+    });
+
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+
+    if (comment.author.id !== userId) {
+      throw new ForbiddenException('You can only delete your own comments');
+    }
+
+    return this.commentsRepo.remove(comment);
+  }
 }

@@ -5,19 +5,27 @@ import { useNavigate } from "react-router-dom";
 export default function CreatePost() {
   const [form, setForm] = useState({ title: "", content: "" });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        setError("You must be logged in to create a post");
+        return;
+      }
+      
       await createPost(form, token);
       alert("Post created successfully!");
       navigate("/");
     } catch (error) {
-      alert("Failed to create post. Please try again.");
+      console.error("Post creation error:", error);
+      setError(error.message || "Failed to create post. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -30,6 +38,8 @@ export default function CreatePost() {
           <h2>Create New Post</h2>
           <p>Share your thoughts with the community</p>
         </div>
+
+        {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit} className="post-form">
           <div className="form-group">
@@ -58,6 +68,7 @@ export default function CreatePost() {
               type="button" 
               onClick={() => navigate("/")}
               className="btn-secondary"
+              disabled={loading}
             >
               Cancel
             </button>

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from './post.entity';
@@ -17,11 +17,61 @@ export class PostsService {
       skip: (page - 1) * limit,
       take: limit,
       relations: ['author'],
+      order: { createdAt: 'DESC' },
     });
-    return { data: result, total };
+    return { 
+      data: result, 
+      total,
+      page: parseInt(page as any),
+      limit: parseInt(limit as any),
+      totalPages: Math.ceil(total / limit)
+    };
   }
 
   async findOne(id: number) {
-    return this.postsRepo.findOne({ where: { id }, relations: ['author', 'comments'] });
+    const post = await this.postsRepo.findOne({ 
+      where: { id }, 
+      relations: ['author', 'comments', 'comments.author'] 
+    });
+    
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+    return post;
+  }
+
+  async update(id: number, postData: Partial<Post>, userId: number) {
+    const post = await this.postsRepo.findOne({ 
+      where: { id }, 
+      relations: ['author'] 
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    if (post.author.id !== userId) {
+      throw new ForbiddenException('You can only update your own posts');
+    }
+
+    await this.postsRepo.update(id, postData);
+    return this.postsRepo.findOne({ where: { id }, relations: ['author'] });
+  }
+
+  async remove(id: number, userId: number) {
+    const post = await this.postsRepo.findOne({ 
+      where: { id }, 
+      relations: ['author'] 
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    if (post.author.id !== userId) {
+      throw new ForbiddenException('You can only delete your own posts');
+    }
+
+    return this.postsRepo.remove(post);
   }
 }

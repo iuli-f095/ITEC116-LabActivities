@@ -1,27 +1,29 @@
-import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, useNavigate, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Posts from "./pages/posts";
 import PostDetails from "./pages/post_info";
 import CreatePost from "./pages/create_post";
-import { useEffect, useState } from "react";
+import EditPost from "./pages/edit_post";
+import Settings from "./pages/settings";
+
+function ProtectedRoute({ children }) {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? children : <Navigate to="/login" />;
+}
+
+function PublicRoute({ children }) {
+  const { isAuthenticated } = useAuth();
+  return !isAuthenticated ? children : <Navigate to="/" />;
+}
 
 function Navigation() {
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userData = localStorage.getItem("user");
-    if (token && userData) {
-      setUser(JSON.parse(userData));
-    }
-  }, []);
-
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
+    logout();
     navigate("/");
   };
 
@@ -34,7 +36,8 @@ function Navigation() {
           {user ? (
             <>
               <Link to="/create_post" className="nav-link">Create Post</Link>
-              <span className="user-welcome">Welcome, {user.name}</span>
+              <Link to="/settings" className="nav-link">Settings</Link>
+              <span className="user-welcome">Welcome, {user.username || user.name}</span>
               <button onClick={handleLogout} className="btn-logout">Logout</button>
             </>
           ) : (
@@ -49,22 +52,72 @@ function Navigation() {
   );
 }
 
+function AppContent() {
+  return (
+    <div className="app">
+      <Navigation />
+      <main className="main-content">
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Posts />} />
+          <Route path="/posts/:id" element={<PostDetails />} />
+          
+          <Route 
+            path="/login" 
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            } 
+          />
+          <Route 
+            path="/register" 
+            element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            } 
+          />
+
+          <Route 
+            path="/create_post" 
+            element={
+              <ProtectedRoute>
+                <CreatePost />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/edit_post/:id" 
+            element={
+              <ProtectedRoute>
+                <EditPost />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/settings" 
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
 function App() {
   return (
-    <BrowserRouter>
-      <div className="app">
-        <Navigation />
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Posts />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/create_post" element={<CreatePost />} />
-            <Route path="/posts/:id" element={<PostDetails />} />
-          </Routes>
-        </main>
-      </div>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
