@@ -1,0 +1,53 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background-color: #fdf4f5;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+* {
+  box-sizing: inherit;
+}
+
+body,
+html,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+
+@media (max-width: 900px) {
+  div[style*="display: flex"][style*="row"] {
+    flex-direction: column !important;
+  }
+
+  input,
+  button {
+    width: 100%;
+  }
+
+  .taskList,
+  .card {
+    width: 100%;
+    padding: 1.5rem !important;
+  }
+}
+
+html, body {
+  overflow-x: hidden;
+}
+
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #BA90C6;
+  border-radius: 4px;
+}
+
+
